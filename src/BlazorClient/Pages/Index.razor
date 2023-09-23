@@ -14,18 +14,24 @@
         <MudText Typo="Typo.h4">Todays fixtures</MudText>
     </MudStack>
     
-    <MudButton Disabled="@_refreshing" OnClick="RefreshFixtures" Variant="Variant.Filled" Color="Color.Primary">
-        @if (_refreshing)
+    <MudStack Row="true" AlignItems="AlignItems.End">
+        @if (FixtureData != null && !string.IsNullOrEmpty(FixtureData.DataRetrived))
         {
-            <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
-            <MudText Class="ms-2">Refreshing..</MudText>
+            <MudText Typo="Typo.caption">Data last updated: @FixtureData.DataRetrived</MudText>
         }
-        else
-        {
-            <MudIcon Icon="@Icons.Material.Filled.Refresh"></MudIcon>
-            <MudText>Refresh</MudText>
-        }
-    </MudButton>
+        <MudButton Disabled="@_refreshing" OnClick="RefreshFixtures" Variant="Variant.Filled" Color="Color.Primary">
+            @if (_refreshing)
+            {
+                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
+                <MudText Class="ms-2">Refreshing..</MudText>
+            }
+            else
+            {
+                <MudIcon Icon="@Icons.Material.Filled.Refresh"></MudIcon>
+                <MudText>Refresh</MudText>
+            }
+        </MudButton>
+    </MudStack>
 </MudStack>
 
 <MudDivider Class="my-4"/>
@@ -139,6 +145,10 @@ else
         var client = HttpClientFactory.CreateClient("FootballApiClient");
         FixtureData = await client.GetFromJsonAsync<FixtureResponse>(
             $"fixtures?league=39&season=2023&date={_todaysDate}");
+        if (FixtureData != null)
+        {
+            FixtureData.DataRetrived = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+        }
     }
 
     private async Task RefreshFixtures()
@@ -167,6 +177,7 @@ else
 
     public class FixtureResponse
     {
+        public string? DataRetrived { get; set; }
         public string? Get { get; set; }
         public Parameters Parameters { get; set; } = new();
         public List<object> Errors { get; set; } = new();
