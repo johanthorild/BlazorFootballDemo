@@ -1,0 +1,60 @@
+﻿@page "/fetchdata"
+@inject HttpClient Http
+
+<PageTitle>Lauynches</PageTitle>
+
+@if (launches == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <MudStack>
+        @foreach (var launch in launches)
+        {
+            <MudPaper Class="pa-3">
+                <MudList>
+                    <MudListItem>@launch.DateUtc</MudListItem>
+                    <MudListItem>@launch.Name</MudListItem>
+                </MudList>
+            </MudPaper>
+        }
+    </MudStack>
+}
+
+@code {
+    private Launch[]? launches;
+    protected override async Task OnInitializedAsync()
+    {
+        launches = await Http.GetFromJsonAsync<Launch[]>("rest/rocketsa") ??
+            Array.Empty<Launch>();
+    }
+
+public class Launch
+{
+    public string? Id { get; init; }
+    public string? StaticFireDateUtc { get; init; }
+    public long StaticFireDateUnix { get; init; }
+    public bool Net { get; init; }
+    public int Window { get; init; }
+    public string? Rocket { get; init; }
+    public bool Success { get; init; }
+    public string? Details { get; init; }
+    public string? Launchpad { get; init; }
+    public int FlightNumber { get; init; }
+    public string? Name { get; init; }
+    public string? DateUtc { get; init; }
+    public long DateUnix { get; init; }
+    public string? DateLocal { get; init; }
+    public string? DatePrecision { get; init; }
+    public bool Upcoming { get; init; }
+    public bool AutoUpdate { get; init; }
+    public bool Tbd { get; init; }
+    public object? LaunchLibraryId { get; init; }
+}
+
+
+
+
+
+}
