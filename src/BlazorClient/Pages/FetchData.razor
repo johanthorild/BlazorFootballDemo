@@ -1,9 +1,12 @@
-﻿@page "/fetchdata"
+﻿@page "/todaysfixtures"
 @using System.Text.Json;
 @inject IHttpClientFactory HttpClientFactory
 @inject IJSRuntime JS
 
-<PageTitle>Live matches</PageTitle>
+<PageTitle>Todays fixtures</PageTitle>
+
+<MudText Typo="Typo.h4">Todays fixtures</MudText>
+<MudDivider Class="my-4"/>
 
 @if (FixtureData == null)
 {
@@ -24,17 +27,40 @@ else
     }
     else {
         <MudStack>
-            @foreach (var fixture in FixtureData.Response)
+            @foreach (var fixture in FixtureData.Response.OrderBy(x => x.Fixture.Date))
             {
                 <MudPaper Class="pa-3">
-                    <MudStack>
-                        <h4>@fixture.League.Name</h4>
-                        <p>Country: @fixture.League.Country</p>
-                        <p>Fixture Date: @fixture.Fixture.Date.ToString("yyyy-MM-dd HH:mm")</p>
-                        <p>Status: @fixture.Fixture.Status.Long</p>
-                        <p>Home Team: @fixture.Teams.Home.Name</p>
-                        <p>Away Team: @fixture.Teams.Away.Name</p>
-                        <p>Goals: @fixture.Goals.Home - @fixture.Goals.Away</p>
+                    <MudStack Row="true" Justify="Justify.SpaceEvenly">
+                        <MudPaper Class="pa-2" Elevation="0">
+                            <MudStack AlignItems="AlignItems.Center">
+                                <MudImage Src=@fixture.Teams.Home.Logo Height="100"></MudImage>
+                                <MudText Typo="Typo.caption">@fixture.Teams.Home.Name</MudText>
+                            </MudStack>
+                        </MudPaper>
+                        <MudPaper Class="pa-2" MinWidth="120" MaxWidth="120">
+                            <MudStack AlignItems="AlignItems.Center">
+                                <MudText Typo="Typo.body2">@fixture.Fixture.Date.ToString("HH:mm")</MudText>
+                                <MudText Typo="Typo.body2">@fixture.Fixture.Venue.Name</MudText>
+                                <MudText Typo="Typo.body2" class="mb-2">@fixture.Fixture.Referee</MudText>
+                                
+                                @switch (fixture.Fixture.Status.Short)
+                                {
+                                    case "NS":
+                                    case "FT":
+                                        <MudAlert Severity="Severity.Normal" NoIcon="true">@fixture.Fixture.Status.Long</MudAlert>
+                                        break;
+                                    default:
+                                        <MudAlert Severity="Severity.Error" NoIcon="true">@fixture.Fixture.Status.Long</MudAlert>
+                                        break;
+                                }
+                            </MudStack>
+                        </MudPaper>
+                        <MudPaper Class="pa-2" Elevation="0">
+                            <MudStack AlignItems="AlignItems.Center">
+                                <MudImage Src=@fixture.Teams.Away.Logo Height="100"></MudImage>
+                                <MudText Typo="Typo.caption">@fixture.Teams.Away.Name</MudText>
+                            </MudStack>
+                        </MudPaper>
                     </MudStack>
                 </MudPaper>
             }
@@ -57,7 +83,10 @@ else
         else
         {
             Console.WriteLine("Found todays fixtures in local storage.");
-            FixtureData = DeserializeObjectToFixtureResponse(fixturesFromLocalStorage);
+            FixtureData = JsonSerializer.Deserialize<FixtureResponse>(fixturesFromLocalStorage, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+            });
         }
     }
 
@@ -69,38 +98,20 @@ else
             $"fixtures?league=39&season=2023&date={TodaysDate}");
     }
 
-    private FixtureResponse? DeserializeObjectToFixtureResponse(object sourceObject)
-    {
-        Console.WriteLine("Deserialize the object..");
+    private async Task<string?> GetLocalStorageItem(string key) =>
+        await JS.InvokeAsync<string?>("localStorage.getItem", key);
 
-        try
-        {
-            string json = JsonSerializer.Serialize(sourceObject);
-            Console.WriteLine("json empty: " + !json.Any());
-            return JsonSerializer.Deserialize<FixtureResponse>(json) ?? null;
-        }
-        catch (JsonException ex)
-        {
-            Console.WriteLine(ex.Message);
-            return null;
-        }
-    }
-
-    private async Task<object> GetLocalStorageItem(string key) =>
-        await JS.InvokeAsync<object>("localStorage.getItem", key);
-
-    private async Task SetLocalStorageItem(object data) =>
+    private async Task SetLocalStorageItem(string data) =>
         await JS.InvokeVoidAsync("localStorage.setItem", TodaysDate, data);
-
 
     public class FixtureResponse
     {
         public string? Get { get; set; }
         public Parameters Parameters { get; set; }
-        public List<object>? Errors { get; set; }
+        public List<object> Errors { get; set; } = new();
         public int? Results { get; set; }
         public Paging Paging { get; set; }
-        public List<FixtureItem>? Response { get; set; }
+        public List<FixtureItem> Response { get; set; } = new();
     }
 
     public class Parameters
