@@ -27,5 +27,11 @@ jobs:
     - name: Change base-tag in index.html from / to BlazorClient
       run: sed -i 's/<base href="\/" \/>/<base href="\/BlazorClient\/" \/>/g' release/wwwroot/index.html
 
+    - name: Debug GITHUB_TOKEN
+      run: echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}"
+      
+    - name: Debug Environment
+      run: env
+      
     - name: Deploy GitHub Pages site
       uses: actions/deploy-pages@v1.2.9
