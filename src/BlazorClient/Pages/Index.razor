@@ -9,7 +9,7 @@
     <MudStack Row="true" AlignItems="AlignItems.End">
         @if (FixtureData != null)
         {
-            <MudImage Src=@FixtureData.Response.FirstOrDefault().League.Logo Height="48"/>
+            <MudImage Src=@FixtureData.Response.FirstOrDefault()?.League.Logo Height="48"/>
         }
         <MudText Typo="Typo.h4">Todays fixtures</MudText>
     </MudStack>
@@ -168,10 +168,10 @@ else
     public class FixtureResponse
     {
         public string? Get { get; set; }
-        public Parameters Parameters { get; set; }
+        public Parameters Parameters { get; set; } = new();
         public List<object> Errors { get; set; } = new();
         public int? Results { get; set; }
-        public Paging Paging { get; set; }
+        public Paging Paging { get; set; } = new();
         public List<FixtureItem> Response { get; set; } = new();
     }
 
@@ -188,10 +188,10 @@ else
 
     public class FixtureItem
     {
-        public Fixture Fixture { get; set; }
-        public League League { get; set; }
-        public Teams Teams { get; set; }
-        public Goals Goals { get; set; }
+        public Fixture Fixture { get; set; } = new();
+        public League League { get; set; } = new();
+        public Teams Teams { get; set; } = new();
+        public Goals Goals { get; set; } = new();
         @* public Score Score { get; set; } *@
     }
 
@@ -203,8 +203,8 @@ else
         public DateTime Date { get; set; }
         public int? Timestamp { get; set; }
         @* public Periods Periods { get; set; } *@
-        public Venue Venue { get; set; }
-        public Status Status { get; set; }
+        public Venue Venue { get; set; } = new();
+        public Status Status { get; set; } = new();
     }
 
     public class Venue
@@ -234,8 +234,8 @@ else
 
     public class Teams
     {
-        public TeamInfo Home { get; set; }
-        public TeamInfo Away { get; set; }
+        public TeamInfo Home { get; set; } = new();
+        public TeamInfo Away { get; set; } = new();
     }
 
     public class TeamInfo
