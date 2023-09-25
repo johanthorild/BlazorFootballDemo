@@ -55,6 +55,14 @@ else
     }
     else {
         <MudStack>
+            @if (FixtureData.Response.Count == 0)
+            {
+                <MudAlert Severity="Severity.Information">
+                    <MudText Typo="Typo.body2">
+                        No fictures being played today.
+                    </MudText>
+                </MudAlert>
+            }
             @foreach (var fixture in FixtureData.Response.OrderBy(x => x.Fixture.Date))
             {
                 <MudPaper Class="pa-3">
